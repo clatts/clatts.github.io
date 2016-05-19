@@ -30,6 +30,8 @@ $(function(){
 					type: this.type
 				},
 				success: function(data){
+					_this.loadNum = 0;
+					_this.dataLen = data.length;
 					data.forEach(function(gal,index){
 						var html = '<div class="box">'+
 										'<div class="imgBox" data-clipboard-text="'+ gal.torrent +' title="Click to copy to clipboard.">'+
@@ -58,17 +60,20 @@ $(function(){
 									'</div>';
 						var $imgD = $(html);
 						$imgD.find('img').on('load',function(){
-							if(index > _this.num-4) {
+							_this.loadNum ++;
+							if(_this.loadNum >= _this.dataLen-4){
+								console.log('执行');
+								$('#masonry').masonry(masonry.settings);
 								_this.busy = false;
 							}
-							$('#masonry').masonry(masonry.settings);
-						})
+						});
 						$('#masonry').masonry().append($imgD).masonry( 'appended', $imgD ).masonry();
 					})
 					_this.start+=_this.num;
 				},
 				error: function(err){
 					console.log(err);
+					setTimeout(function(){_this.getGals();},500)
 				},
 				done: function(data){
 					console.log(data)
@@ -85,7 +90,7 @@ $(function(){
 			
 			$('#masonry').on('mouseover','.imgBox',function(){
 				var client = new ZeroClipboard(this);
-				client.on( "copy", function( event ) {
+				client.on( "aftercopy", function( event ) {
 					t = setTimeout(function(){
 						clearTimeout(t);
 						alert('复制成功',event.target);
